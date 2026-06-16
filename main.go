@@ -1,35 +1,31 @@
 package main
 
 import (
-	"flag"
+	"os"
 	"fmt"
 )
 
-
 func main() {
-	create := flag.String("create", "", "Create a todo")
-	list := flag.Bool("list", false, "List all todo")
-	deleteID := flag.Int("delete", 0, "Delete a todo")
-	done := flag.Int("done", 0, "Completed a todo")
+	args := os.Args
 
-	fmt.Println(create)
+	if len(args) < 2 {
+		fmt.Println("Please provide a command")
+	}
 
-	flag.Parse()
+	fmt.Println(args)
 
-	if *create != "" {
-		fmt.Println("Creating a todo")
-	} 
-
-	if *list {
+	switch args[1] {
+	case "create":
+		fmt.Println("creating a todo")
+	case "list":
 		fmt.Println("listing all the todo")
-	}
+	case "delete": 
+		fmt.Println("deleting a todo")
+	case "done":
+		fmt.Println("completed a todo")
 
-	if *deleteID != 0 {
-		fmt.Println("delete a todo")
+	default: 
+		fmt.Println("Unknown command")
 	} 
-
-	if *done != 0{
-		fmt.Println("done with a todo")
-	}
 
 }
