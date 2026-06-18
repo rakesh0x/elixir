@@ -18,16 +18,20 @@ func main() {
 
 	switch args[1] {
 	case "create":
-		createTodoStruct(Objective, args[0])
+		todo := createTodoStruct(Objective, args[0])
+		storeTodos(todo)
 		fmt.Println("creating a todo")
 	case "list":
-		createTodoStruct(Objective, args[1])
+		todo := createTodoStruct(Objective, args[1])
+		storeTodos(todo)
 		fmt.Println("listing all the todo")
 	case "delete": 
-		createTodoStruct(Objective, args[2])
+		todo := createTodoStruct(Objective, args[2])
+		storeTodos(todo)
 		fmt.Println("deleting a todo")
 	case "done":
-		createTodoStruct(Objective, args[3])
+		todo := createTodoStruct(Objective, args[3])
+		storeTodos(todo)
 		fmt.Println("completed a todo")
 
 	default: 

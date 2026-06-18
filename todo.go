@@ -13,6 +13,6 @@ type Todos struct {
 
 func createTodoStruct(Objective string, Description string) Todos {
 	_id := uuid.New().String()
-	TodoStruct := Todos{Id: _id, Objective: Objective, Done: true, Description: Description}
+	TodoStruct := Todos{Id: _id, Objective: Objective, Done: false, Description: Description}
 	return TodoStruct
 }
