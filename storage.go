@@ -3,11 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 )
 
-// load all the todos and do the operations
+//store all the todos
 func storeTodos(todo Todos) (string, error) {
 
 	filename := "todos.json"
@@ -22,7 +21,7 @@ func storeTodos(todo Todos) (string, error) {
 		}
 	}
 
-	fileBytes, err := ioutil.ReadFile(filename)
+	fileBytes, err := os.ReadFile(filename)
 	if err != nil {
 		panic(err)
 	}
@@ -51,12 +50,31 @@ func storeTodos(todo Todos) (string, error) {
 	return filename, nil
 }
 
-func deleteTodo(Id string) {
-	if Id != "" {
-		deletedId := Id
+//delete a todo
+func deleteTodo(Id string) error {
+	data, err := listtodo()
+	if err != nil {
+		return err
 	}
 
-	// do this after storing the struct array in the todos.json
+	for i, t := range data {
+		if t.Id == Id {
+			data = append(data[:i], data[i+1:]...)
+			break
+		}
+	}
+
+	return fmt.Errorf("todo with %s not found", Id)
 }
 
-func listtodo() {}
+//list all todos
+func listtodo() ([]Todos, error) {
+	data, err := os.ReadFile("todos.json")
+	if err != nil {
+		return []Todos{}, nil
+	}
+
+	var todos []Todos
+	err = json.Unmarshal(data, &todos)
+	return todos, err
+}
