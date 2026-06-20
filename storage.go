@@ -6,71 +6,75 @@ import (
 	"os"
 )
 
-//store all the todos
-func storeTodos(todo Todos) (string, error) {
-
-	filename := "todos.json"
-	var err error
-
-	//append the json to todos.json
-	_, err = os.Stat(filename)
-	if os.IsNotExist(err) {
-			_, err = os.Create("todos.json")
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	fileBytes, err := os.ReadFile(filename)
+func saveTodos(todos []Todos) error {
+	data, err := json.MarshalIndent(todos, "", "  ")
 	if err != nil {
-		panic(err)
+		return err
 	}
-
-	//store the value in the bytes
-	var todos []Todos
-	if len(fileBytes) > 0 {
-		err = json.Unmarshal(fileBytes, &todos)
-		if err != nil {
-			fmt.Println(err)
-		}
-	}
-
-	data := append(todos, todo)
-
-	dataBytes, err := json.Marshal(data)
-	if err != nil {
-		panic(err)
-	}
-
-	err = os.WriteFile(filename, dataBytes, 0644) 
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return filename, nil
+	return os.WriteFile("todos.json", data, 0644)
 }
 
-//delete a todo
+func storeTodos(todo Todos) (string, error) {
+	var todos []Todos
+	data, err := os.ReadFile("todos.json")
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return "", fmt.Errorf("failed to read file: %w", err)
+		}
+	} else if len(data) > 0 {
+		err = json.Unmarshal(data, &todos)
+		if err != nil {
+			return "", fmt.Errorf("failed to parse file: %w", err)
+		}
+	}
+
+	todos = append(todos, todo)
+	err = saveTodos(todos)
+	return "todos.json", err
+}
+
 func deleteTodo(Id string) error {
-	data, err := listtodo()
+	todos, err := listtodo()
 	if err != nil {
 		return err
 	}
 
-	for i, t := range data {
+	for i, t := range todos {
 		if t.Id == Id {
-			data = append(data[:i], data[i+1:]...)
-			break
+			todos = append(todos[:i], todos[i+1:]...)
+			return saveTodos(todos)
 		}
 	}
 
-	return fmt.Errorf("todo with %s not found", Id)
+	return fmt.Errorf("todo with id %s not found", Id)
 }
 
-//list all todos
+func doneTodo(Id string) error {
+	todos, err := listtodo()
+	if err != nil {
+		return err
+	}
+
+	for i, t := range todos {
+		if t.Id == Id {
+			todos[i].Done = true
+			return saveTodos(todos)
+		}
+	}
+
+	return fmt.Errorf("todo with id %s not found", Id)
+}
+
 func listtodo() ([]Todos, error) {
 	data, err := os.ReadFile("todos.json")
 	if err != nil {
+		if os.IsNotExist(err) {
+			return []Todos{}, nil
+		}
+		return nil, err
+	}
+
+	if len(data) == 0 {
 		return []Todos{}, nil
 	}
 
